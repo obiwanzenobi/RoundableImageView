@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RoundableImageView">
+        <attr name="cornerRadius_common" format="dimension"/>
+        <attr name="cornerRadius_top_left" format="dimension"/>
+        <attr name="cornerRadius_top_right" format="dimension"/>
+        <attr name="cornerRadius_bottom_right" format="dimension"/>
+        <attr name="cornerRadius_bottom_left" format="dimension"/>
+        <attr name="isCircle" format="boolean"/>
+        <attr name="borderColor" format="color"/>
+        <attr name="borderWidth" format="dimension"/>
+        <attr name="android:background"/>
+    </declare-styleable>
+</resources>
