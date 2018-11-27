@@ -125,7 +125,7 @@ public class RoundableImageView extends AppCompatImageView {
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(getClipPath(), maskPaint);
 
-        int saveCount = canvas.saveLayer(null, clipPaint, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
+        int saveCount = canvas.saveLayer(null, clipPaint, Canvas.ALL_SAVE_FLAG | Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
 
         if (background != null) {
             background.setBounds(0, 0, getWidth(), getHeight());
