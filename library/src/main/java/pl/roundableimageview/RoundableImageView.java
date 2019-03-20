@@ -11,7 +11,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatImageView;
@@ -20,9 +19,6 @@ import android.util.AttributeSet;
 public class RoundableImageView extends AppCompatImageView {
 
     public static final int CORNER_RADIUS_COUNT = 8;
-    public static final int CORNER_START_RATIO = 4;
-    public static final int DRAWING_START_POINT_RATIO = CORNER_START_RATIO / 2;
-
     public static final float BORDER_ALPHA_MARGIN = 0.3f;
 
     private Path clipPath, borderPath;
@@ -73,18 +69,14 @@ public class RoundableImageView extends AppCompatImageView {
             background = a.getDrawable(R.styleable.RoundableImageView_android_background);
 
             initMaskPaints();
-
         } finally {
             a.recycle();
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            setLayerType(LAYER_TYPE_SOFTWARE, null); // to allow clipPath working with rounded corners
         }
 
         clipPath = new Path();
         borderPath = new Path();
         createCornerRadius();
+        setLayerType(LAYER_TYPE_SOFTWARE, maskPaint);
     }
 
     private void initMaskPaints() {
@@ -97,16 +89,8 @@ public class RoundableImageView extends AppCompatImageView {
         clipPaint.setAntiAlias(true);
         layerPaint.setAntiAlias(true);
 
-        clipPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        setLayerType(LAYER_TYPE_HARDWARE, layerPaint); // switching to software will cause graphical bugs
+        clipPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
         updateLayerPaint(layerPaint);
-    }
-
-    @Override
-    public void setWillNotCacheDrawing(boolean willNotCacheDrawing) {
-        if (getLayerType() == LAYER_TYPE_NONE) {
-            super.setWillNotCacheDrawing(willNotCacheDrawing);
-        }
     }
 
     private void initBorderPaint() {
@@ -125,7 +109,7 @@ public class RoundableImageView extends AppCompatImageView {
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(getClipPath(), maskPaint);
 
-        int saveCount = canvas.saveLayer(null, clipPaint, Canvas.ALL_SAVE_FLAG | Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
+        canvas.saveLayer(null, clipPaint, Canvas.ALL_SAVE_FLAG);
 
         if (background != null) {
             background.setBounds(0, 0, getWidth(), getHeight());
@@ -137,9 +121,6 @@ public class RoundableImageView extends AppCompatImageView {
         if (hasBorder) {
             canvas.drawPath(getBorderPath(), borderPaint);
         }
-
-        canvas.restoreToCount(saveCount);
-
     }
 
     private Path getBorderPath() {
@@ -154,7 +135,6 @@ public class RoundableImageView extends AppCompatImageView {
             float lowerDimenValue = getLowerDimenValue() - (borderPaint.getStrokeWidth());
             float value = (lowerDimenValue / 2.0f) + BORDER_ALPHA_MARGIN;
             borderPath.addCircle(this.getWidth() / 2.0f, this.getHeight() / 2.0f, value, Path.Direction.CW);
-
         } else {
             drawRoundedBorderPath();
         }
@@ -163,9 +143,6 @@ public class RoundableImageView extends AppCompatImageView {
     }
 
     private void drawRoundedBorderPath() {
-        float w = getWidth();
-        float h = getHeight();
-
         RectF rectF = new RectF(0, 0, this.getWidth(), this.getHeight());
         borderPath.addRoundRect(rectF, corners, Path.Direction.CW);
     }
@@ -188,12 +165,10 @@ public class RoundableImageView extends AppCompatImageView {
 
             float lowerDimenValue = getLowerDimenValue();
             clipPath.addCircle(this.getWidth() / 2.0f, this.getHeight() / 2.0f, lowerDimenValue / 2.0f, Path.Direction.CW);
-
         } else {
             RectF rectF = new RectF(0, 0, this.getWidth(), this.getHeight());
 
             clipPath.addRoundRect(rectF, corners, Path.Direction.CW);
-
         }
 
         return clipPath;
@@ -220,8 +195,7 @@ public class RoundableImageView extends AppCompatImageView {
             }
 
             topLeftCornerRadius = topRightCornerRadius = bottomLeftCornerRadius =
-                    bottomRightCornerRaius = commonRoundedCornersRadius;
-
+                bottomRightCornerRaius = commonRoundedCornersRadius;
         } else {
             corners[0] = topLeftCornerRadius;
             corners[1] = topLeftCornerRadius;
@@ -232,7 +206,6 @@ public class RoundableImageView extends AppCompatImageView {
             corners[6] = bottomLeftCornerRadius;
             corners[7] = bottomLeftCornerRadius;
         }
-
     }
 
     public void setBorderWidth(float borderWidth) {
